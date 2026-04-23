@@ -1,0 +1,51 @@
+import fs from 'fs';
+import http from 'http'
+
+const server = http.createServer((req, res) => {
+
+    console.log(req.url);
+
+
+    // 'Server Side Rendering'
+    //res.writeHead(200, {'Content-Type': 'text/html'});
+    //res.write('<h1>Hola Mundo!</h1>');
+    //res.write(`<h1>URL ${ req.url }</h1>`)
+    //res.end();
+    //})
+
+
+    //const data = {name: 'Daniel Cordova', age: 32, city: 'Ecuador'};
+    //res.writeHead(200, {'Content-Type': 'application/json' });
+    //res.end( JSON.stringify(data));
+
+    if (req.url === '/') {
+        const htmlFile = fs.readFileSync('./public/index.html', 'utf-8');
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(htmlFile);
+        return;
+    }
+
+    if( req.url?.endsWith('.js') ) {
+        res.writeHead(200, { 'Content-Type': 'application/javascript' });
+    } else if(req.url?.endsWith('.css')) {
+        res.writeHead(200, { 'Content-Type': 'text/css' });
+    }
+
+    // Creamos una variable para verificar el archivo existente en la carpeta 'public' 
+    const path = `./public${req.url}`;
+
+    // Verificar si existe antes de leer
+    if (fs.existsSync(path)) {
+        const responseContent = fs.readFileSync(path, 'utf-8');
+        return res.end(responseContent);
+    }else{
+    //  Si no existe → evitar crash
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('404 - Archivo no encontrado');}
+
+})
+
+server.listen(8080, () => {
+    console.log('Server running on port 8080');
+
+})
